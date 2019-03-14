@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "69631424738",
+    "firebase_url": "https://befitbingo.firebaseio.com",
+    "project_id": "befitbingo",
+    "storage_bucket": "befitbingo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69631424738:android:148a41ee93f1289f",
+        "android_client_info": {
+          "package_name": "com.example.befitbingo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "69631424738-sbskf6g6cak4d2ks0jrbv1qf7arcdp29.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.befitbingo",
+            "certificate_hash": "a09544f3577cf57d8fba4f066d86781149cc16e7"
+          }
+        },
+        {
+          "client_id": "69631424738-cv9r54i9s5ccifvqib0h4olph6fcssg4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9Ojg8376xFLtvU6IR1Ng0ZR5bL2mhUIA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "69631424738-cv9r54i9s5ccifvqib0h4olph6fcssg4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "69631424738-mrebr9riah95lm7sr96o2arv6bpj5mma.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.befitbingo"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
