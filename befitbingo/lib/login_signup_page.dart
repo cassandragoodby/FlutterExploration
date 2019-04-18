@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'authentication.dart';
 // import 'package:firebase_database/firebase_database.dart';
 // import 'dart:async';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class LoginSignUpPage extends StatefulWidget {
   
@@ -189,20 +190,57 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
   Widget _showLogo() {
     return new Hero(
       tag: 'hero',
+      
       child: Padding(
-        padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
-        child: CircleAvatar(
-          backgroundColor: Colors.transparent,
-          radius: 48.0,
-          child: Image.asset('images/BeFit-icon.png'),
-        ),
+        padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        // child: CircleAvatar(
+          // backgroundColor: Colors.transparent,
+          // radius: 48.0,
+          child:buildCarousel(context)
+          // child: Image.asset('images/Onboard1.png',
+          // fit: BoxFit.cover),
+          
+        // ),
       ),
     );
   }
 
+  final List<String> imgList = [
+    'images/Onboard1.png',
+    'images/Onboard2.png',
+    'images/Onboard3.png',
+];
+
+  Widget buildCarousel(BuildContext context) {
+    int _current = 0;
+    return CarouselSlider(
+        height: 400.0,
+        items: imgList.map(
+        (onboardpic) {
+          return Builder(
+            builder: (BuildContext context) {
+              return Container(
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.symmetric(horizontal: 5.0),
+                // decoration: BoxDecoration(
+                //   color: Colors.white
+                // ),
+                child: Image.asset(
+                onboardpic,
+                fit: BoxFit.cover,
+                width: 1000.0,
+              ),
+              );
+            },
+          );
+        }).toList(),
+      );
+}
+
+
   Widget _showEmailInput() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 0.0),
       child: new TextFormField(
         maxLines: 1,
         keyboardType: TextInputType.emailAddress,
@@ -221,7 +259,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
 
   Widget _showPasswordInput() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(10.0, 15.0, 10.0, 0.0),
       child: new TextFormField(
         maxLines: 1,
         obscureText: true,
@@ -254,13 +292,13 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
 
   Widget _showPrimaryButton() {
     return new Padding(
-        padding: EdgeInsets.fromLTRB(0.0, 45.0, 0.0, 0.0),
+        padding: EdgeInsets.fromLTRB(20.0, 45.0, 20.0, 0.0),
         child: SizedBox(
           height: 40.0,
           child: new RaisedButton(
             elevation: 5.0,
             shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
-            color: Colors.blue,
+            color: Color(0xff7cc04f), //7cc04f
             child: _formMode == FormMode.LOGIN
                 ? new Text('Login',
                     style: new TextStyle(fontSize: 20.0, color: Colors.white))

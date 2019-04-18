@@ -4,45 +4,34 @@ import 'authentication.dart';
 import 'package:flutter/material.dart';
 // import 'dart:async';
 // import 'root_page.dart';
+import 'gameboard.dart';
 
 int amountFilled = 0;
 
-final thisMonthObject = [
-  {"goalNameMonth": "Wow", "typeMonth": "Lifestyle"},
-  {"goalNameMonth": "Amazing", "typeMonth": "Sleep"},
-  {"goalNameMonth": "Yas", "typeMonth": "Exercise"},
-  {"goalNameMonth": "Queen", "typeMonth": "Exercise"},
-  {"goalNameMonth": "Dang", "typeMonth": "Food"},
-];
+class CustomIcons{
+  CustomIcons._();
 
-// class HomePage extends StatelessWidget{
-//   HomePage({Key key, this.auth, this.userId, this.onSignedOut})
-//       : super(key: key);
+  static const _kFontFam = 'CustomIcons';
 
-//   final BaseAuth auth;
-//   final VoidCallback onSignedOut;
-//   final String userId;
-
-//   void _signOut() async {
-//     try {
-//       await auth.signOut();
-//       onSignedOut();
-//     } catch (e) {
-//       print(e);
-//     }
-//   }
-
-// }
+  static const IconData checkmark = const IconData(0xe800, fontFamily: _kFontFam);
+  static const IconData exercise = const IconData(0xe801, fontFamily: _kFontFam);
+  static const IconData food = const IconData(0xe802, fontFamily: _kFontFam);
+  static const IconData lifestyle = const IconData(0xe803, fontFamily: _kFontFam);
+  static const IconData sleep = const IconData(0xe804, fontFamily: _kFontFam);
+}
 
 class HomePageState extends StatefulWidget{
   HomePageState({Key key, this.auth, this.userId, this.onSignedOut})
       : super(key: key);
+  
+   final BaseAuth auth;
+   final VoidCallback onSignedOut;
+   final String userId;
 
-  final BaseAuth auth;
-  final VoidCallback onSignedOut;
-  final String userId;
-
+  // _signOut(auth);
+  
   void _signOut() async {
+    // print("here");
     try {
       await auth.signOut();
       onSignedOut();
@@ -54,9 +43,10 @@ class HomePageState extends StatefulWidget{
   State createState() => new HomePage();
 }
 
+typedef void VoidCallback();
+
 class HomePage extends State<HomePageState> {
   
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -66,7 +56,11 @@ class HomePage extends State<HomePageState> {
           new FlatButton(
               child: new Text('Logout',
                   style: new TextStyle(fontSize: 17.0, color: Colors.white)),
-              // onPressed: _signOut()
+              onPressed: () {
+                print("signing out");
+                widget._signOut();
+                // VoidCallback();
+              }
           )
         ],
       ),
@@ -76,7 +70,7 @@ class HomePage extends State<HomePageState> {
       ]),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(Icons.add),
-        backgroundColor: Colors.orange,
+        backgroundColor: Color(0xfffcb11f),
         onPressed: () {
           //OPEN ADD FORM
           Navigator.push(
@@ -96,23 +90,27 @@ totalMonth() async {
   var thisMonthQuery = Firestore.instance.collection('ThisMonth');
   var querySnapshot = await thisMonthQuery.getDocuments();
   amountFilled = querySnapshot.documents.length;
-  print('in totalmonth');
-  print(amountFilled);
+  // print('in totalmonth');
+  // print(amountFilled);
+  setState(() {
+    // print("set state");
+  });
   return amountFilled;
 }
 
   Widget _buildUItracker(context) {
     totalMonth();
-    print("insideUI");
-    print(amountFilled);
+    // print("insideUI");
+    // print(amountFilled);
     // print(amountFilled);
     return GestureDetector(
         onTap: () {
           print("Container clicked");
           //Move to this months goal list
+          totalMonth();
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ThisMonthAdded()),
+            MaterialPageRoute(builder: (context) => ThisMonthAddedState()),
           );
         },
         child: Container(
@@ -126,17 +124,33 @@ totalMonth() async {
             
             //https://medium.com/@rjstech/flutter-custom-paint-tutorial-build-a-radial-progress-6f80483494df
             //USE FOR CIRCLE ^^^^
-            border: Border.all(color: Colors.green),
+            border: Border.all(color: Color(0xff7cc04f)),
             borderRadius: BorderRadius.circular(5.0),
-            color: Colors.green,
+            color: Color(0xff7cc04f),
           ),
-          child: Text(amountFilled.toString() + outOf,
-              style: Theme.of(context)
-                  .textTheme
-                  .display1
-                  .copyWith(color: Colors.white)),
+          //IF 25 switch to next
+          child: _getNext(),
         ));
   }
+
+  Widget _getNext() {
+    // print('get next');
+    if(amountFilled < 25){
+    return Text(amountFilled.toString() + outOf,
+      style: Theme.of(context)
+          .textTheme
+          .display1
+          .copyWith(color: Colors.white));
+    }
+    else{
+      return Text("NEXT",
+        style: Theme.of(context)
+            .textTheme
+            .display1
+            .copyWith(color: Colors.white));
+    }
+  }
+  
 
   Widget _buildBody(BuildContext context) {
     // var thisMonthsGoals = Firestore.instance.collection('ThisMonth').snapshots();
@@ -174,14 +188,34 @@ totalMonth() async {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(
+            color: _getBorderColor(context, data),
+            width: 3
+            ),
           borderRadius: BorderRadius.circular(5.0),
         ),
-        child: ListTile(
-          leading: Icon(Icons.favorite),
+        child: new Dismissible(
+          background: Container(color: Color(0xffee6e57)),
+          key: new Key(record.goalName.toString()),
+          direction: DismissDirection.endToStart,
+          confirmDismiss: (DismissDirection direction) {
+            showAlertDialog(context,data);
+            // _delete(data);
+          },
+          resizeDuration: null,
+          dismissThresholds: _dismissThresholds(),
+          // background: new LeaveBehindView(),
+        child: new ListTile(
+          // leading: Icon(Icons.favorite),
+          leading: _getListIcon(context, data),
           title: Text(record.goalName),
-          trailing: Text(record.type.toString()),
+          subtitle: Text(record.type.toString()),
           onTap: () {
+            print("ssssssss");
+            print("amount filled: ");
+            print( amountFilled);
+            totalMonth();
+            if(amountFilled < 25){
             record.reference.updateData({'AmountUsed': record.usedAmount + 1});
             record.reference.updateData({'thisMonth': true});
             Firestore.instance.collection('ThisMonth').add({
@@ -189,25 +223,132 @@ totalMonth() async {
               'Type': record.type,
               'AmountUsed': record.usedAmount + 1,
               "thisMonth": record.storeForMonth,
-              "Used": true
+              "Used": true,
+              "completed":false
             });
             
             //ADD TO THISMONTHOBJECT if under 25 (count)
             //UPDATE NUMBER IN THIS MONTH
-            setState(() {
-              
-            });
-            // print(amountFilled);
-            print("running");
-            
+            //After getting totalMonth() data update
+            print("WAITING DATA");
+            totalMonth();
             //WORKAROUND ^^^
             // build(context);
             // _buildUItracker(context,amountFilled);
+          }
+          totalMonth();
+          if(amountFilled >= 24){
+              //auto open next page
+              //popup stating next
+              print("25 push to next");
+               
+            }
           },
         ),
       ),
+      )
     );
   }
+}
+
+Map<DismissDirection, double> _dismissThresholds() {
+  Map<DismissDirection, double> map = new Map<DismissDirection, double>();
+  map.putIfAbsent(DismissDirection.horizontal, () => 0.5);
+  return map;
+}
+ 
+void _delete(DocumentSnapshot data) {
+  // final record = Record.fromSnapshot(data);
+  Firestore.instance.collection('Goals').document(data.documentID).delete();
+}
+
+showAlertDialog(BuildContext context,DocumentSnapshot data) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Confirm Delete"),
+          content: new Text("Are you sure you want to delete?"),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Cancel"),
+              onPressed: () {
+                
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text("Yes"),
+              onPressed: () {
+                _delete(data);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+}
+
+
+Color _getBorderColor(BuildContext context, DocumentSnapshot data){
+  final recordMonth = RecordMonth.fromSnapshot(data);
+  if(recordMonth.typeMonth.toString() == "Exercise"){
+    return Color(0xfffcb11f);
+  }
+  else if(recordMonth.typeMonth.toString() == "Sleep"){
+    return Color(0xff46c3f3);
+  }
+  else if(recordMonth.typeMonth.toString() == "Food") {
+    return Color(0xffee6e57);
+  }
+  else if(recordMonth.typeMonth.toString() == "Lifestyle") {
+    return Color(0xffba5abb);
+  }
+  else{
+    return Colors.grey;
+  }
+}
+
+Widget _getListIcon(BuildContext context, DocumentSnapshot data) {
+  final recordMonth = RecordMonth.fromSnapshot(data);
+  if(recordMonth.typeMonth.toString() == "Exercise"){
+    return Icon(
+      CustomIcons.exercise,
+      color: _getBorderColor(context, data),
+      size: 35.0,
+      );
+  }
+  else if(recordMonth.typeMonth.toString() == "Sleep") {
+    return Icon(
+      CustomIcons.sleep,
+      color: _getBorderColor(context, data),
+      size: 35.0,
+      );
+  }
+  else if(recordMonth.typeMonth.toString() == "Food") {
+    return Icon(
+      CustomIcons.food,
+      color: _getBorderColor(context, data),
+      size: 35.0,
+      );
+  }
+  else if(recordMonth.typeMonth.toString() == "Lifestyle") {
+    return Icon(
+      CustomIcons.lifestyle,
+      color: _getBorderColor(context, data),
+      size: 35.0,
+      );
+  }
+  else {
+      return Icon(
+      CustomIcons.checkmark,
+      color: _getBorderColor(context, data),
+      size: 35.0,
+      );
+    }
 }
 
 class Record {
@@ -271,7 +412,8 @@ class AddNewState extends State<AddNew> {
                     'GoalName': _goalNameNew,
                     'Type': _typeNew,
                     'AmountUsed': 0,
-                    "thisMonth": true
+                    "thisMonth": true,
+                    "completed":false
                   });
                   print("Adding to firebase");
                   //exit back to screen
@@ -389,7 +531,7 @@ class AddNewState extends State<AddNew> {
         textAlign: TextAlign.center,
         style: TextStyle(
             fontSize: 13.0,
-            color: Colors.red,
+            color: Color(0xffee6e57),
             height: 1.0,
             fontWeight: FontWeight.w300),
       );
@@ -403,7 +545,12 @@ class AddNewState extends State<AddNew> {
 
 // THIS MONTH PAGE
 
-class ThisMonthAdded extends StatelessWidget {
+class ThisMonthAddedState extends StatefulWidget{
+  @override 
+  State createState() => new ThisMonthAdded();
+}
+
+class ThisMonthAdded extends State<ThisMonthAddedState>  {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -412,8 +559,33 @@ class ThisMonthAdded extends StatelessWidget {
       ),
       body: Center(
         child: _buildMonthBody(context),
+        
       ),
+      floatingActionButton: _getFAB(context),
     );
+  }
+
+  Widget _getFAB(BuildContext context) {
+    // totalMonth();
+    print("inside this month");
+    print(amountFilled);
+    if (amountFilled >= 25) {
+      return FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => GameBoard()),
+          );
+        },
+        //TO GAME BOARD VIEW
+        icon: Icon(Icons.arrow_forward),
+        label: Text("Next"),
+        backgroundColor: Color(0xff7cc04f),
+      );
+    } else {
+      return Container();
+      
+    }
   }
 
   Widget _buildMonthBody(BuildContext context) {
@@ -448,24 +620,51 @@ class ThisMonthAdded extends StatelessWidget {
      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
      child: Container(
        decoration: BoxDecoration(
-         border: Border.all(color: Colors.grey),
+         border: Border.all(
+           color: _getBorderColor(context, data),
+           width: 3
+           ),
          borderRadius: BorderRadius.circular(5.0),
        ),
+       child: new Dismissible(
+         background: Container(color: Color(0xffee6e57)),
+          key: new Key(recordMonth.goalNameMonth.toString()),
+          direction: DismissDirection.endToStart,
+          onDismissed: (DismissDirection direction) {
+            _deleteMonth(data);
+            setState(() {
+              this.setState(() {});
+            });
+          },
+          resizeDuration: null,
+          dismissThresholds: _dismissThresholds(),
+          // background: new LeaveBehindView(),
        child: ListTile(
         //  title: Text("Wow"),
-         title: Text(recordMonth.goalNameMonth),
-         trailing: Text(recordMonth.typeMonth.toString()),
+        leading: _getListIcon(context, data),
+         title: Text(recordMonth.goalNameMonth), //trailing
+         subtitle: Text(recordMonth.typeMonth.toString()),
          onTap: () => print(recordMonth),
+         
        ),
      ),
+     )
    );
  }
 
 }
 
+_deleteMonth(DocumentSnapshot data) {
+  // final recordMonth = RecordMonth.fromSnapshot(data);
+  // print(data.documentID);
+  Firestore.instance.collection('ThisMonth').document(data.documentID).delete();
+  
+}
+
 class RecordMonth {
   final String goalNameMonth;
   final String typeMonth;
+  final bool completedMonth;
   // final int usedAmount;
   // final bool storeForMonth;
   final DocumentReference reference;
@@ -475,12 +674,14 @@ class RecordMonth {
       //   assert(map['typeMonth'] != null),
       : assert(map['GoalName'] != null),
         assert(map['Type'] != null),
+        assert(map['completed']!= null),
         // assert(map['AmountUsed'] != null),
         // assert(map['thisMonth'] != null),
         // goalNameMonth = map['goalNameMonth'],
         // typeMonth = map['typeMonth'];
         goalNameMonth = map['GoalName'],
-        typeMonth = map['Type'];
+        typeMonth = map['Type'],
+        completedMonth = map['completed'];
         // usedAmount = map['AmountUsed'],
         // storeForMonth = map['thisMonth'];
 
